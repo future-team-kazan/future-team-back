@@ -25,235 +25,195 @@ function pa($item, $show_for = false)
 }
 
 
-class TempDataBase
+class CStatistic
 {
-    private static $tiblock = 22;//temp data
- 
- 
-	 
-     public function getAllData()
+    private static $ciblock = 57;//ID инфоблока Статистики
+    private static $diblock = 59;//ID инфоблока Статистики
+    private static $biblock = 60;//ID инфоблока Рождаемость
+
+
+
+    public function getDDataByYear($year)
     {
-        $arFilter = Array("IBLOCK_ID" => self::$tiblock, "ACTIVE" => "Y");
-        $qrating = CIBlockElement::GetList(Array('property_YEAR'=>'ASC'), $arFilter, false, Array(), Array());
-        
-        $lables=array();
-        $income=array();
-        $outcome=array();
-        
-		while ($fld = $qrating->GetNextElement()) {
-         	$fields = $fld->GetFields();
-            $props = $fld->GetProperties();
-            $lables[] = $props['YEAR']['VALUE'];
-            $income[] = $props['INCOME']['VALUE'];
-            $outcome[] = $props['OUTCOME']['VALUE'];
-        }
-		$res=array('labels'=>$lables,
-					'dataset'=>array(
-						array(
-							'label'=>'income',
-							'data'=>$income,
-						),
-						array(
-							'label'=>'outcome',
-							'data'=>$outcome,
-						)
-					)					
-					);
-        return $res;
-    }
-	
-     public function getDataByYear($year)
-    {
-        $arFilter = Array("IBLOCK_ID" => self::$tiblock, "ACTIVE" => "Y", "PROPERTY_YEAR" => $year);
-        $qrating = CIBlockElement::GetList(Array(), $arFilter, false, Array(), Array());
-        $res=array();
+        global $USER;
+
+        $arFilter = Array("IBLOCK_ID" => self::$diblock, "ACTIVE" => "Y","PROPERTY_YEAR"=>$year);
+        $qrating = CIBlockElement::GetList(Array('ID'=>'ASC'), $arFilter, false, Array(), Array());
+
         while ($fld = $qrating->GetNextElement()) {
-			$fields = $fld->GetFields();
+             ;
             $props = $fld->GetProperties();
+
             $res[] = array(
-					array('label' => 'Доходы','data' =>$props['INCOME']['VALUE']),
-					array('label' => 'Расходы','data' =>$props['OUTCOME']['VALUE'])
-				);
+                 $props['RID']['VALUE'],
+                $props['DPOK']['VALUE'],
+            );
+
         }
         return $res;
     }
-		
-     public function deleteData($id)
+
+    public function getPrenatalDate( )
     {
-		return CIBlockElement::Delete($id);
-    }
-	
-    public function insertInformation(
-        $year, // 
-        $income,//  
-        $outcome// 
-    ) //Добавить новые данные
-    {
-        $tempdb = new CIBlockElement;
-		$name = 'Temp name';
-        $arFields = array(
-            'IBLOCK_ID' =>  self::$tiblock,
-            'ACTIVE' => 'Y',
-            'NAME' => $name,
-            'PROPERTY_VALUES' => array(
-                'INCOME' => $income, //$tid - treatment ID
-                'OUTCOME' => $outcome,// Дозировка препарата - строковое значение
-                'YEAR' => $year,// начало выполнения лечебного мероприятия например начало курса приема витаминов
-            ),
-        );
 
-        if($res = $tempdb->Add($arFields)){
-            return $res;
-        }else{
-           //pa(array('error'=>$tempdb->LAST_ERROR));
-            echo $tempdb->LAST_ERROR;
-        }
 
-    }
-
-}
-
-class CPersonal
-{
-    private static $piblock = 21;//ID инфоблока Cотрудники
- 
- 
-	 
-     public function getAllPersonal()
-    {
-        global $USER;
-
-        $arFilter = Array("IBLOCK_ID" => self::$piblock, "ACTIVE" => "Y");
+        $arFilter = Array("IBLOCK_ID" => 57, "ACTIVE" => "Y");
         $qrating = CIBlockElement::GetList(Array('ID'=>'ASC'), $arFilter, false, Array(), Array());
 
-		while ($fld = $qrating->GetNextElement()) {
-         	$fields = $fld->GetFields();
+
+        while ($fld = $qrating->GetNextElement()) {
+
             $props = $fld->GetProperties();
+pr($props);die();
 
-            $rsUser = CUser::GetByID($props['USER']);
-            $arUser = $rsUser->Fetch();
+            $arFilter2 = Array("IBLOCK_ID" => 58, "ACTIVE" => "Y","PROPERTY_MAPNAME"=>  $props['RID']['VALUE']);
+            $qrating2 = CIBlockElement::GetList(Array('ID'=>'ASC'), $arFilter2, false, Array(), Array());
 
-			$res[] = array(
-				'id' => (int)$fields['ID'],
-				'fio' => $fields['NAME'],
-				//'fio' => $arUser['NAME'].' '.$arUser['SECOND_NAME'].' '.$arUser['LAST_NAME'],
-				'price' => (int)$props['PRICE']['VALUE'],
-				'age' => (int)$props['AGE']['VALUE'],
-			);
+            $f=0;
+            if ($fld = $qrating2->GetNextElement()) {
+                $f=1;
+            }
+
+            $res[] = array(
+                $props['RID']['VALUE'],
+                $f,
+            );
+
+        }
+        return $res;
+    }
+
+    public function getBDataByYear($year)
+    {
          
-        }
-        return $res;
-    }
 
-     public function getPersonById($id)
-    {
-        global $USER;
-
-        $arFilter = Array("IBLOCK_ID" => self::$piblock, "ACTIVE" => "Y","ID"=>$id);
+        $arFilter = Array("IBLOCK_ID" => self::$biblock, "ACTIVE" => "Y","PROPERTY_YEAR"=>$year);
         $qrating = CIBlockElement::GetList(Array('ID'=>'ASC'), $arFilter, false, Array(), Array());
 
-		if ($fld = $qrating->GetNextElement()) {
-         	$fields = $fld->GetFields();
+        while ($fld = $qrating->GetNextElement()) {
+
             $props = $fld->GetProperties();
 
-            $rsUser = CUser::GetByID($props['USER']);
-            $arUser = $rsUser->Fetch();
-
-			$res = array(
-				'id' => (int)$fields['ID'],
-				'fio' => $arUser['NAME'].' '.$arUser['SECOND_NAME'].' '.$arUser['LAST_NAME'],
-				'price' => (int)$props['PRICE']['VALUE'],
-				'age' => (int)$props['AGE']['VALUE'],
-			);
+            $res[] = array(
+                $props['RID']['VALUE'],
+                $props['BPOK']['VALUE'],
+            );
 
         }
         return $res;
     }
-     public function getPersonByUid($uid)
-    {
-        global $USER;
 
-        $arFilter = Array("IBLOCK_ID" => self::$piblock, "ACTIVE" => "Y","PROPERTY_USER"=>$uid);
+    public function getDeath($region)
+    {
+        $arFilter = Array("IBLOCK_ID" => self::$diblock,  "PROPERTY_RID"=>$region);
+        $qrating = CIBlockElement::GetList(Array('property_YEAR'=>'ASC'), $arFilter, false, Array(), Array());
+
+        while ($fld = $qrating->GetNextElement()) {
+
+            $props = $fld->GetProperties();
+
+            $res[] = $props['DPOK']['VALUE'];
+
+
+        }
+        return $res;
+    }
+
+    public function getuniqreg()
+    {
+        $arFilter = Array("IBLOCK_ID" => self::$diblock, "ACTIVE" => "Y");
         $qrating = CIBlockElement::GetList(Array('ID'=>'ASC'), $arFilter, false, Array(), Array());
 
-		if ($fld = $qrating->GetNextElement()) {
-         	$fields = $fld->GetFields();
+        while ($fld = $qrating->GetNextElement()) {
+            $props = $fld->GetProperties();
+            $res[] = $props['RID']['VALUE'];
+        }
+
+        return array_unique($res);
+    }
+
+
+    public function getDData($year,$ibid)
+    {
+
+        pr($year);
+
+        $arFilter = Array("IBLOCK_ID" => $ibid, "PROPERTY_YEAR"=>$year);
+        $qrating = CIBlockElement::GetList(Array('ID'=>'ASC'), $arFilter, false, Array(), Array());
+
+        while ($fld = $qrating->GetNextElement()) {
+
             $props = $fld->GetProperties();
 
-            $rsUser = CUser::GetByID($props['USER']);
-            $arUser = $rsUser->Fetch();
+            $res[] = array(
+                $props['RID']['VALUE'],
+                $props['VALUE']['VALUE'],
 
-			$res[] = array(
-				'id' => (int)$fields['ID'],
-				'fio' => $arUser['NAME'].' '.$arUser['SECOND_NAME'].' '.$arUser['LAST_NAME'],
-				'price' => (int)$props['PRICE']['VALUE'],
-				'age' => (int)$props['AGE']['VALUE'],
-			);
+            );
 
         }
         return $res;
     }
-	 
-     public function deleteData($id)
+
+
+    public function getPTDataByYear($year)
     {
-		return CIBlockElement::Delete($id);
-    }
-	
-    public function insertPerson(
-        $fio, // 
-        $age,//  
-        $price// 
-    ) //Добавить новые данные
-    {
-        $tempdb = new CIBlockElement;
-		$name = $fio;
-        $arFields = array(
-            'IBLOCK_ID' =>  self::$piblock,
-            'ACTIVE' => 'Y',
-            'NAME' => $name,
-            'PROPERTY_VALUES' => array(
-                'FIO' => $fio, //$
-                'PRICE' => $price,//
-                'AGE' => $age,// 
-            ),
-        ); 
-        if($res = $tempdb->Add($arFields)){
-            return $res;
-        }else{
-            return array('error'=>$tempdb->LAST_ERROR);
+        $arFilter = Array("IBLOCK_ID" => 65, "PROPERTY_YEAR"=>$year);
+        $qrating = CIBlockElement::GetList(Array('ID'=>'ASC'), $arFilter, false, Array(), Array());
+
+        while ($fld = $qrating->GetNextElement()) {
+
+            $props = $fld->GetProperties();
+
+            $res[] = array(
+                $props['RID']['VALUE'],
+                $props['VALUE']['VALUE'],
+            );
+
         }
-
+        return $res;
     }
 
-    public function updatePerson($id,//id элемента, которому обновляем данные
-        $fio, //
-        $age,//
-        $price//
-    ) //Добавить новые данные
+    public function getCentersData()
     {
         global $USER;
-        $tempdb = new CIBlockElement;
 
-        $props = array(
-            'FIO' => $fio, //$
-            'PRICE' => $price,//
-            'AGE' => $age,//
-        );
-		if($fio=='') unset($props['FIO']);
-		if($price=='') unset($props['PRICE']);
-		if($age=='') unset($props['AGE']);
+        $arFilter = Array("IBLOCK_ID" => self::$ciblock, "ACTIVE" => "Y");
+        $qrating = CIBlockElement::GetList(Array('ID'=>'ASC'), $arFilter, false, Array(), Array());
 
-        $arFields = array(
-            'IBLOCK_ID' =>  self::$piblock,
-            "MODIFIED_BY"    => $USER->GetID(), // элемент изменен текущим пользователем
-            'PROPERTY_VALUES' => $props
-        );
-        if($res = $tempdb->Update($id,$arFields)){
-            return $res;
-        }else{
-            return array('error'=>$tempdb->LAST_ERROR);
+        while ($fld = $qrating->GetNextElement()) {
+            $fields = $fld->GetFields();
+            $props = $fld->GetProperties();
+            $region = getElementByID();
+            $res[] = array(
+                'region'=>$props['RID']['VALUE'],
+
+            );
+
         }
-
+        return $res;
     }
+
+    public function getGrDataForRegions()
+    {
+        global $USER;
+
+        $arFilter = Array("IBLOCK_ID" => self::$giblock, "ACTIVE" => "Y");
+        $qrating = CIBlockElement::GetList(Array('ID'=>'ASC'), $arFilter, false, Array(), Array());
+
+        while ($fld = $qrating->GetNextElement()) {
+            $fields = $fld->GetFields();
+            $props = $fld->GetProperties();
+            $region = getElementByID();
+            $res[] = array(
+                'region'=>$props['RID']['VALUE'],
+
+            );
+
+        }
+        return $res;
+    }
+
+
 
 }

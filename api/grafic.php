@@ -1,13 +1,12 @@
-{
-	"labels": ["2006", "2007", "2008", "2009", "2010", "2011", "2012"],
-	"datasets": [
-		{
-			"label": "Доходы",
-			"data": [65, 59, 80, 81, 56, 55, 40]
-		},
-		{
-			"label": "Расходы",
-			"data": [28, 48, 40, 19, 86, 27, 90]
-		}
-	]
-}
+<
+$arFilter = Array("IBLOCK_ID" => self::$biblock, "ACTIVE" => "Y","PROPERTY_YEAR"=>$year);
+$qrating = CIBlockElement::GetList(Array('ID'=>'ASC'), $arFilter, false, Array(), Array());
+
+while ($fld = $qrating->GetNextElement()) {
+
+$props = $fld->GetProperties();
+
+$res[] = array(
+$props['RID']['VALUE'],
+$props['BPOK']['VALUE'],
+);

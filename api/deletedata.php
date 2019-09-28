@@ -1,24 +1,13 @@
-<?php 
-header('Access-Control-Allow-Origin: *'); 
-header('Access-Control-Allow-Methods: POST, OPTIONS'); 
-header('Access-Control-Allow-Headers: X-Requested-With, Content-type');
-?>
 <?
-require($_SERVER["DOCUMENT_ROOT"]."/bitrix/modules/main/include/prolog_before.php");
- 
-require($_SERVER["DOCUMENT_ROOT"]."/api/tools.php");  
+$delimiter = ';';
 
+$csv = file_get_contents($_SERVER["DOCUMENT_ROOT"]."/upload/kill.csv");
+$rows = explode(PHP_EOL, $csv);
+$data = [];
 
-$error='';
-
-$id = $_REQUEST['id'];//$tid - год
-
-$data = TempDataBase::deleteData($id);
-
-if(strlen($error)==0){
-    print(json_encode($data));
-}else{
-    echo json_encode(array('error' => $error));
+foreach ($rows as $row)
+{
+$data[] = explode($delimiter, $row);
 }
-?>
 
+print_r($data);
