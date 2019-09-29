@@ -82,6 +82,42 @@ pr($props);die();
         }
         return $res;
     }
+    function getNameByRID($rid){
+
+
+        $arFilter2 = Array("IBLOCK_ID" => 58, "ACTIVE" => "Y","PROPERTY_MAPNAME"=>  $rid);
+        $qrating2 = CIBlockElement::GetList(Array('ID'=>'ASC'), $arFilter2, false, Array(), Array());
+
+        if ($fld2 = $qrating2->GetNextElement()) {
+
+
+            $fields2 = $fld2->GetFields();
+
+        }
+        return $fields2['NAME'];
+    }
+
+    function getPSByRID($rid){
+
+
+        $arFilter2 = Array("IBLOCK_ID" => 58, "ACTIVE" => "Y","PROPERTY_MAPNAME"=>  $rid);
+        $qrating2 = CIBlockElement::GetList(Array('ID'=>'ASC'), $arFilter2, false, Array(), Array());
+
+        if ($fld2 = $qrating2->GetNextElement()) {
+
+
+            $fields2 = $fld2->GetFields();
+
+            $arFilter = Array("IBLOCK_ID" => 57, "ACTIVE" => "Y","PROPERTY_REGION"=>   $fields2['ID']);
+            $qrating = CIBlockElement::GetList(Array('ID'=>'ASC'), $arFilter, false, Array(), Array());
+            $res = false;
+            if ($fld = $qrating->GetNextElement()) {
+                $res = true;
+            }
+
+        }
+        return $res;
+    }
 
     public function getBDataByYear($year)
     {
@@ -104,6 +140,22 @@ pr($props);die();
     }
 
     public function getDeath($region)
+    {
+        $arFilter = Array("IBLOCK_ID" => self::$diblock,  "PROPERTY_RID"=>$region);
+        $qrating = CIBlockElement::GetList(Array('property_YEAR'=>'ASC'), $arFilter, false, Array(), Array());
+
+        while ($fld = $qrating->GetNextElement()) {
+
+            $props = $fld->GetProperties();
+
+            $res[] = $props['DPOK']['VALUE'];
+
+
+        }
+        return $res;
+    }
+
+    public function getPStatus($region)
     {
         $arFilter = Array("IBLOCK_ID" => self::$diblock,  "PROPERTY_RID"=>$region);
         $qrating = CIBlockElement::GetList(Array('property_YEAR'=>'ASC'), $arFilter, false, Array(), Array());

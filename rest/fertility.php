@@ -16,9 +16,6 @@ while ($fld = $qrating->GetNextElement()) {
 
     $props = $fld->GetProperties();
 
-
-
-
         $arFilter2 = Array("IBLOCK_ID" => 58, "ACTIVE" => "Y","ID"=>  $props['REGION']['VALUE']);
         $qrating2 = CIBlockElement::GetList(Array('ID'=>'ASC'), $arFilter2, false, Array(), Array());
 

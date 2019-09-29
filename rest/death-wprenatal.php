@@ -8,7 +8,13 @@ require($_SERVER["DOCUMENT_ROOT"]."/bitrix/modules/main/include/prolog_before.ph
 
 require($_SERVER["DOCUMENT_ROOT"]."/api/tools.php");
 
-$yeararray = array(1990,1991,1992,1993,1994,1995,1996,1997,1998,1999,2000,2001,2002,2003,2004,2005,2006,2007,2008,2009,2010,2011,2012,2013,2014);
+$yeararray = array();
+for ($i=1990;$i<=2014;$i++) {
+    $yeararray[]=$i;
+}
+
+$reg_array = array('');
+$reg_array = array('ru-kt','ru-tl','ru-cv','ru-ke','ru-ga','ru-tu',);
 
 $error='';
 
@@ -19,14 +25,19 @@ $regions = array();
 $regions = CStatistic::getuniqreg();
 
 $datasets = array();
-pr(count($yeararray));
+
 foreach ($regions as $region) {
+    $isP = CStatistic::getPSByRID($region);
+    if($isP) continue; //проверка, есть ли
 
     $data = CStatistic::getDeath($region);
-if(count($data)<25) continue;
+    if(count($data)<25) continue;
+    if(!in_array($region,$reg_array)) continue;
+
+    $rname=CStatistic::getNameByRID($region);
 
     $datasets[]=array(
-        "label"=>$region,
+        "label"=>$rname,
         "data"=>$data
     );
 }
